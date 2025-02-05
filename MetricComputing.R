@@ -1,4 +1,4 @@
-# Metric calculation, file name input (e.g. 30_SSN.csv)
+# Metric calculation
 
 library(dplyr)
 library(igraph)
