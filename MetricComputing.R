@@ -14,7 +14,7 @@ for (x in SSN_list) {
   Graph <- read.csv(file.path(SSN_files, x)) 
   Graph <- graph_from_data_frame(Graph[, c("Source", "Target")], directed = FALSE)
   
-  # Example of file name input: 30_SSN.csv
+  # Example of file name input: "30_SSN.csv"
   
   patient <- sub("_.*", "", x)
   
