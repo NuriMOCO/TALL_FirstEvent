@@ -21,11 +21,8 @@ for (x in SSN_list) {
   
   # Metrics not related to communities
   diameter <- diameter(Graph)  
-  #edge_density <- edge_density(Graph)  # Redundant in a network with a set number of edges
   num_nodes <- vcount(Graph) 
-  #mean_degree <- mean(degree(Graph))  # Redundant in a network with a set number of edges
   global_clustering <- transitivity(Graph, type = "global") 
-  #avg_path_length <- mean_distance(Graph)  # Redundant in a network with a set number of edges
   efficiency <- global_efficiency(Graph)  
   
   # Identification and filtering of communities
