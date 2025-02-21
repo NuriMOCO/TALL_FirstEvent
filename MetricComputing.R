@@ -4,58 +4,66 @@ library(dplyr)
 library(igraph)
 
 ##Single Sample Network Estimates 
+
 SSN_files <- "/datos/ot/anakamura/Nuri/TALL_Ranked_NoNormal"
 SSN_list <- list.files(SSN_files)
 
-## New data frame 
+
+#SSN_list <- SSN_list[1:30]
+
 metrics <- data.frame()
 
 for (x in SSN_list) {
   Graph <- read.csv(file.path(SSN_files, x)) 
   Graph <- graph_from_data_frame(Graph[, c("Source", "Target")], directed = FALSE)
   
-  # Example of file name input: "30_SSN.csv"
-  
   patient <- sub("_.*", "", x)
   
-  
-  # Metrics not related to communities
+  # Métricas de la red completa
   diameter <- diameter(Graph)  
-  num_nodes <- vcount(Graph) 
-  global_clustering <- transitivity(Graph, type = "global") 
+  num_nodes <- vcount(Graph)  
+  global_clustering <- transitivity(Graph, type = "global")  
   efficiency <- global_efficiency(Graph)  
   
-  # Identification and filtering of communities
+  # Detección de comunidades con Louvain
   set.seed(123)
   louvain <- cluster_louvain(Graph)
   community_sizes <- sizes(louvain)
   
-  # Communities bigger than 10 nodes
-  filtered_community_sizes <- community_sizes[community_sizes >= 10]
+  # Identificar comunidades con al menos 10 nodos
+  large_communities <- which(community_sizes >= 10)
   
+  # Crear un subgrafo con solo los nodos en comunidades grandes
+  nodes_in_large_communities <- which(membership(louvain) %in% large_communities)
+  subgraph <- induced_subgraph(Graph, nodes_in_large_communities)
   
-  # Metrics related to communities 
-  num_communities <- length(filtered_community_sizes) 
-  mean_CommunitySize <- mean(filtered_community_sizes)  
-  max_community_size <- max(filtered_community_sizes)  
+  # Recalcular modularidad en la subred filtrada
+  if (vcount(subgraph) > 0) {
+    filtered_louvain <- cluster_louvain(subgraph)
+    modularity_value <- modularity(filtered_louvain)
+  } else {
+    modularity_value <- NA
+  }
   
-  # Metrics vector
-  metricsV <- c(patient, num_communities, diameter, num_nodes, modularity(louvain),
+  # Calcular métricas de comunidades grandes
+  num_communities <- length(large_communities)
+  mean_CommunitySize <- ifelse(length(large_communities) > 0, mean(community_sizes[large_communities]), NA)
+  max_community_size <- ifelse(length(large_communities) > 0, max(community_sizes[large_communities]), NA)
+  
+  # Guardar métricas
+  metricas <- c(patient, num_communities, diameter, num_nodes, modularity_value,
                 global_clustering, efficiency, mean_CommunitySize, max_community_size)
   
-  # rowbind
-  metrics <- rbind(metrics, metricsV)
+  metrics <- rbind(metrics, metricas)
 }
 
 
-# Colname vector
+
+# Asignar nombres de columnas
 cols <- c("patient", "num_communities", "diameter", "num_nodes", "modularity_score", 
           "global_clustering", "efficiency", "mean_CommunitySize", "max_community_size")
 colnames(metrics) <- cols
-
-#Arranged patients 
 metrics <- metrics %>% mutate(patient = as.numeric(patient)) %>% arrange(patient)
 
 
-
-write.csv(metrics, file.path("~/TALL/metrics123.csv") )
+write.csv(metrics, file.path("~/TALL/metricsfinal.csv") )
