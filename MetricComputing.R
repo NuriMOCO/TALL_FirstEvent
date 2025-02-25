@@ -64,4 +64,4 @@ metrics <- metrics %>% mutate(patient = as.numeric(patient)) %>% arrange(patient
 metricsold <- read.csv("~/TALL/Final/8metrics242.csv")
 metrics[] <- lapply(metrics, as.numeric)
 
-write.csv(metrics, file.path("~/TALL/metricsfinal.csv") )
+write.csv(metrics, file.path("~/TALL/metricsfinal.csv"), row.names = FALSE  )
