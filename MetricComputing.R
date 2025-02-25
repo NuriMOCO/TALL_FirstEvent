@@ -1,9 +1,4 @@
-# Metric calculation
-
-library(dplyr)
 library(igraph)
-
-##Single Sample Network Estimates 
 
 SSN_files <- "/datos/ot/anakamura/Nuri/TALL_Ranked_NoNormal"
 SSN_list <- list.files(SSN_files)
@@ -65,5 +60,8 @@ cols <- c("patient", "num_communities", "diameter", "num_nodes", "modularity_sco
 colnames(metrics) <- cols
 metrics <- metrics %>% mutate(patient = as.numeric(patient)) %>% arrange(patient)
 
+
+metricsold <- read.csv("~/TALL/Final/8metrics242.csv")
+metrics[] <- lapply(metrics, as.numeric)
 
 write.csv(metrics, file.path("~/TALL/metricsfinal.csv") )
